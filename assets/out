@@ -1,0 +1,21 @@
+#!/bin/sh
+
+exec 3>&1 # make stdout available for output
+exec 1>&2 # redirect all stdout to stderr
+
+# Get path to build_root
+build_root=$1
+
+# payload
+payload=`cat`
+s3uri=$(echo "$payload" | jq -r '.params.s3uri')
+options=$(echo "$payload" | jq -r '.params.options // [] | join(" ")')
+
+# export for `aws` cli
+export AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id')
+export AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key')
+
+echo "Uploading to S3..."
+eval aws s3 sync $source $s3uri $options
+
+echo '{"version": {}}' >&3
