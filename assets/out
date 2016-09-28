@@ -16,6 +16,6 @@ export AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id')
 export AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key')
 
 echo "Uploading to S3..."
-eval aws s3 sync $source $s3uri $options
+eval aws s3 sync $build_root $s3uri $options
 
 echo '{"version": {}}' >&3
