@@ -11,9 +11,15 @@ payload=`cat`
 s3uri=$(echo "$payload" | jq -r '.params.s3uri')
 options=$(echo "$payload" | jq -r '.params.options // [] | join(" ")')
 
-# export for `aws` cli
-export AWS_ACCESS_KEY_ID=$(echo "$payload" | jq -r '.source.access_key_id')
-export AWS_SECRET_ACCESS_KEY=$(echo "$payload" | jq -r '.source.secret_access_key')
+# export for `aws` cli only if it is supplied.
+aws_access_key=$(echo "$payload" | jq -r '.source.access_key_id')
+aws_secret_key=$(echo "$payload" | jq -r '.source.secret_access_key')
+
+if [ "$aws_access_key" != "null" -a "$aws_secret_key" != "null" ]
+then
+  export AWS_ACCESS_KEY_ID="$aws_access_key"
+  export AWS_SECRET_ACCESS_KEY="$aws_secret_key"
+fi
 
 echo "Uploading to S3..."
 eval aws s3 sync $build_root $s3uri $options
